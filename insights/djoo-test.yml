@@ -1,0 +1,21 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: False
+  
+#  vars:
+#    pub_cloud: false
+
+  tasks:
+    - name: output yum repolist
+      command: yum repolist
+      args:
+        warn: false
+      register: results
+ 
+    - name: check wehther yum repolist result contains rhui 
+      set_fact: 
+        pub_cloud: true
+      when: '"rhui" in results.stdout'
+      
+#    - debug: msg="{{ pub_cloud }}"

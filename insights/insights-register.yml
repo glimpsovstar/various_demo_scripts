@@ -1,0 +1,54 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: False
+
+  vars:
+    akey: AAP21-client
+    orgid: "1268969"
+    pkg_name: 
+      - insights-client
+      - scap-security-guide
+      - openscap-scanner
+      - openscap
+
+
+  tasks:
+    - name: output yum repolist
+      command: yum repolist
+      args:
+        warn: false
+      register: results
+ 
+    - name: check wehther yum repolist result contains rhui 
+      set_fact: 
+        pub_cloud_pool: '^(Employee SKU)$'
+        pub_cloud_ak: AAP21-client-pubcloud
+      when: '"rhui" in results.stdout'
+
+    - name: Register a system to Red Hat
+      redhat_subscription:
+        state: present
+        activationkey: "{{ pub_cloud_ak | default( akey ) }}" 
+        org_id: "{{ orgid }}"
+        pool: "{{ pub_cloud | default( omit ) }}"
+        auto_attach: no
+      ignore_errors: True
+
+    - name: to ensure Red Hat insights pkg is available
+      yum:
+        name: "{{ pkg_name }}"
+        state: latest
+
+    - name: Red Hat Insights client register
+      command: /bin/insights-client --register
+
+    - name: Red Hat Insights client compliance config
+      command: /bin/insights-client --compliance
+
+    - name: Red Hat Insights client enable schedule
+      command: /bin/insights-client --enable-schedule
+
+    - name: Red Hat Insights client checkin
+      command: /bin/insights-client --checkin        
+

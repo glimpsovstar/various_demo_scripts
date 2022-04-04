@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: False
+
+  vars:
+    pkg_name: 
+      - insights-client
+      - scap-security-guide
+      - openscap-scanner
+      - openscap
+
+
+  tasks:
+    - name: to ensure Red Hat insights pkg is available
+      yum:
+        name: "{{ pkg_name }}"
+        state: latest
+
+    - name: Red Hat Insights client register
+      command: /bin/insights-client --register
+
+    - name: Red Hat Insights client compliance config
+      command: /bin/insights-client --compliance
+      
+    - name: Red Hat Insights client enable schedule
+      command: /bin/insights-client --enable-schedule
+        
+    - name: Red Hat Insights client checkin
+      command: /bin/insights-client --checkin

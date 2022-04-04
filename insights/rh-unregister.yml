@@ -1,0 +1,25 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: False
+
+  vars:
+    pkg_name: 
+      - insights-client
+      - scap-security-guide
+      - openscap-scanner
+      - openscap
+
+
+  tasks:
+    - name: Red Hat Insights client unregister
+      command: /bin/insights-client --register
+
+    - name: to ensure Red Hat insights pkg is available
+      yum:
+        name: "{{ pkg_name }}"
+        state: absent
+
+    - name: UnRegister a system to Red Hat 
+      redhat_subscription:
+        state: absent
